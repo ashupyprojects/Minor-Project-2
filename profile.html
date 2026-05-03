@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bharat Portal - Profile</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="left">
+    <img src="icons/emblem.png" height="80" width="50">
+    <a href="/index.html">
+      <img src="icons/websitelogo.png" height="80" width="250">
+    </a>
+  </div>
+
+  <div class="center">
+    <input type="text" placeholder="Search Central Government Schemes" class="search-box">
+  </div>
+
+  <div class="right" id="auth-area"></div>
+</header>
+
+<main class="profile-page">
+  <div class="profile-card-wide">
+
+    <!-- LEFT -->
+    <div class="profile-card-left">
+
+      <!-- PROFILE IMAGE -->
+      <div class="profile-avatar">
+        <img id="profile-img" style="display:none;">
+        <span id="profile-initial"></span>
+      </div>
+
+      <!-- UPLOAD BUTTON -->
+      <input type="file" id="upload-photo" accept="image/*" hidden>
+
+<button onclick="document.getElementById('upload-photo').click()" class="upload-btn">
+  Change Photo
+</button>
+
+      <h2 id="profile-name"></h2>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="profile-card-right">
+
+      <section class="profile-section">
+        <h3>Information</h3>
+
+        <div class="profile-info-grid">
+
+          <div class="profile-info-item">
+            <span class="label">Email</span>
+            <span id="profile-email"></span>
+          </div>
+
+          <div class="profile-info-item">
+            <span class="label">Date of Birth</span>
+            <span id="profile-dob"></span>
+          </div>
+
+          <div class="profile-info-item">
+            <span class="label">State</span>
+            <span id="profile-state"></span>
+          </div>
+
+          <div class="profile-info-item">
+            <span class="label">Caste Category</span>
+            <span id="profile-caste"></span>
+          </div>
+
+          <div class="profile-info-item">
+            <span class="label">Beneficiary Type</span>
+            <span id="profile-category"></span>
+          </div>
+
+          <div class="profile-info-item">
+            <span class="label">Employment Status</span>
+            <span id="profile-employment"></span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SAVED SCHEMES -->
+      <h3>Saved Schemes</h3>
+      <div id="saved-list"></div>
+
+    </div>
+  </div>
+</main>
+
+<script src="auth.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const rawUser = localStorage.getItem("bpUser");
+  if (!rawUser) {
+    window.location.href = "/signinform.html";
+    return;
+  }
+
+  const user = JSON.parse(rawUser);
+
+  // ===== USER INFO =====
+  document.getElementById("profile-name").textContent = user.name || "";
+  document.getElementById("profile-email").textContent = user.email || "";
+  document.getElementById("profile-dob").textContent = user.dob || "";
+  document.getElementById("profile-state").textContent = user.state || "";
+  document.getElementById("profile-category").textContent = user.category || "";
+  document.getElementById("profile-employment").textContent = user.employmentStatus || "";
+  document.getElementById("profile-caste").textContent = user.casteCategory || "";
+
+  // ===== PROFILE IMAGE =====
+  const imgEl = document.getElementById("profile-img");
+  const initialEl = document.getElementById("profile-initial");
+  const uploadInput = document.getElementById("upload-photo");
+
+  const savedImage = localStorage.getItem("profileImage");
+
+  if (savedImage) {
+    imgEl.src = savedImage;
+    imgEl.style.display = "block";
+    initialEl.style.display = "none";
+  } else {
+    initialEl.textContent = user.name.charAt(0).toUpperCase();
+  }
+
+  // ✅ FIXED UPLOAD LOGIC
+  uploadInput.addEventListener("change", function () {
+    const file = this.files[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const base64 = e.target.result;
+
+      localStorage.setItem("profileImage", base64);
+
+      imgEl.src = base64;
+      imgEl.style.display = "block";
+      initialEl.style.display = "none";
+
+      alert("Profile photo updated ✅");
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  // ===== SAVED SCHEMES =====
+  const savedList = document.getElementById("saved-list");
+  let saved = JSON.parse(localStorage.getItem("savedSchemes")) || [];
+
+  savedList.innerHTML = "";
+
+  if (saved.length === 0) {
+    savedList.innerHTML = "<p>No saved schemes</p>";
+    return;
+  }
+
+  saved.forEach((scheme, index) => {
+    const div = document.createElement("div");
+    div.classList.add("saved-card");
+
+    div.innerHTML = `
+      <div class="saved-left">
+        <span class="saved-tag">Saved</span>
+        <span class="saved-name">${scheme.name}</span>
+      </div>
+
+      <div class="saved-right">
+        <a href="${scheme.link}" target="_blank" class="view-link">View / Apply</a>
+        <button class="remove-btn" onclick="removeScheme(${index})">✖</button>
+      </div>
+    `;
+
+    savedList.appendChild(div);
+  });
+
+});
+
+// ===== REMOVE =====
+function removeScheme(index) {
+  let saved = JSON.parse(localStorage.getItem("savedSchemes")) || [];
+  saved.splice(index, 1);
+  localStorage.setItem("savedSchemes", JSON.stringify(saved));
+  location.reload();
+}
+</script>
+
+</body>
+</html>

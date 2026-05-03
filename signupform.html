@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up - Bharat Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="auth-body">
+
+  <div class="top-brand">
+    <img src="icons/emblem.png" class="top-emblem">
+    <a href="/index.html">
+      <img src="icons/websitelogo.png" class="top-logo">
+    </a>
+  </div>
+
+  <div class="signup-card">
+    <h1 class="signup-title">
+      Sign up for <span>Bharat Portal</span>
+    </h1>
+
+    <form id="signup-form">
+
+      <input type="text" name="name" class="input-field" placeholder="Full Name*" required>
+
+      <input type="date" name="dob" class="input-field" required>
+
+      <input type="text" name="state" class="input-field" placeholder="State*" required>
+
+      <select name="category" class="input-field" required>
+        <option value="" disabled selected>Select Category*</option>
+        <option value="student">Student</option>
+        <option value="farmer">Farmer</option>
+        <option value="senior_citizen">Senior Citizen</option>
+        <option value="entrepreneur">Entrepreneur</option>
+      </select>
+
+      <select name="employmentStatus" class="input-field" required>
+        <option value="" disabled selected>Employment Status*</option>
+        <option value="working">Working</option>
+        <option value="unemployed">Unemployed</option>
+      </select>
+
+      <select name="casteCategory" class="input-field" required>
+        <option value="" disabled selected>Caste Category*</option>
+        <option value="general">General</option>
+        <option value="obc">OBC</option>
+        <option value="sc">SC</option>
+        <option value="st">ST</option>
+      </select>
+
+      <!-- EMAIL -->
+      <input type="email" name="email" class="input-field" placeholder="Email*" required>
+
+      <!-- OTP BUTTON -->
+      <button type="button" onclick="sendOTP()" class="submit-btn" style="background:#666;">
+        Send OTP
+      </button>
+
+      <!-- OTP INPUT -->
+      <input type="text" id="otp" class="input-field" placeholder="Enter OTP">
+
+      <!-- PASSWORD -->
+      <input type="password" name="password" class="input-field" placeholder="Password*" minlength="6" required>
+
+      <label class="terms-row">
+        <input type="checkbox" required>
+        <span>I consent to terms of use.</span>
+      </label>
+
+      <button type="submit" class="submit-btn">
+        Create Account
+      </button>
+
+      <p id="signup-message" class="signup-message"></p>
+
+    </form>
+
+    <p class="bottom-link">
+      Already have an account?
+      <a href="/signinform.html">Sign in</a>
+    </p>
+  </div>
+
+  <!-- ================= JS ================= -->
+  <script>
+    // SEND OTP
+    async function sendOTP() {
+      const email = document.querySelector("[name='email']").value;
+
+      if (!email) {
+        alert("Enter email first!");
+        return;
+      }
+
+      const res = await fetch("/api/send-otp", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ email })
+      });
+
+      const data = await res.json();
+      alert(data.message);
+    }
+
+    // SIGNUP
+    document.getElementById("signup-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+
+      const data = {
+        name: formData.get("name"),
+        dob: formData.get("dob"),
+        state: formData.get("state"),
+        category: formData.get("category"),
+        employmentStatus: formData.get("employmentStatus"),
+        casteCategory: formData.get("casteCategory"),
+        email: formData.get("email"),
+        password: formData.get("password")
+      };
+
+      const otp = document.getElementById("otp").value;
+
+      if (!otp) {
+        alert("Enter OTP first!");
+        return;
+      }
+
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          email: data.email,
+          otp: otp,
+          userData: data
+        })
+      });
+
+      const result = await res.json();
+
+      document.getElementById("signup-message").textContent = result.message;
+
+      if (result.success) {
+        setTimeout(() => {
+          window.location.href = "/signinform.html";
+        }, 1000);
+      }
+    });
+  </script>
+
+</body>
+</html>

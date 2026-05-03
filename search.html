@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Eligibility Filter</title>
+</head>
+<body>
+
+<h2>Find Schemes</h2>
+
+<input type="number" id="age" placeholder="Enter Age"><br><br>
+
+<select id="beneficiary">
+  <option value="student">Student</option>
+  <option value="farmer">Farmer</option>
+  <option value="senior">Senior</option>
+  <option value="entrepreneur">Entrepreneur</option>
+  <option value="women">Women</option>
+</select><br><br>
+
+<select id="state">
+  <option value="all">All India</option>
+  <option value="Delhi">Delhi</option>
+</select><br><br>
+
+<button onclick="findSchemes()">Search</button>
+
+<div id="results"></div>
+
+<script>
+async function findSchemes() {
+  const data = {
+    age: parseInt(document.getElementById("age").value),
+    beneficiary: document.getElementById("beneficiary").value,
+    state: document.getElementById("state").value
+  };
+
+  const res = await fetch("/filter-schemes", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+  });
+
+  const schemes = await res.json();
+
+  const div = document.getElementById("results");
+  div.innerHTML = "";
+
+  if (schemes.length === 0) {
+    div.innerHTML = "<p>No schemes found</p>";
+    return;
+  }
+
+  schemes.forEach(s => {
+    const el = document.createElement("div");
+    el.innerHTML = `<a href="${s.link}" target="_blank">✅ ${s.name}</a>`;
+    div.appendChild(el);
+  });
+}
+</script>
+
+</body>
+</html>
