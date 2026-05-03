@@ -4,10 +4,13 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+/* ================= RESEND ================= */
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* ================= FILE PATH ================= */
 const USERS_FILE = path.join(__dirname, "users.json");
@@ -20,17 +23,6 @@ app.use(express.static(__dirname));
 /* ================= ROOT ================= */
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
-});
-
-/* ================= EMAIL CONFIG ================= */
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
 });
 
 /* ================= OTP STORE ================= */
@@ -68,7 +60,7 @@ app.post("/api/send-otp", async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Email required"
       });
@@ -80,11 +72,16 @@ app.post("/api/send-otp", async (req, res) => {
 
     otpStore[email] = otp;
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+    await resend.emails.send({
+      from: "onboarding@resend.dev",
       to: email,
       subject: "Bharat Portal OTP Verification",
-      text: `Your OTP is ${otp}`
+      html: `
+        <h2>Bharat Portal</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>Valid for signup verification.</p>
+      `
     });
 
     res.json({
@@ -108,7 +105,7 @@ app.post("/api/signup", async (req, res) => {
     const { email, otp, userData } = req.body;
 
     if (!email || !otp || !userData) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Missing data"
       });
@@ -207,12 +204,9 @@ app.post("/api/signin", async (req, res) => {
       user: {
         id: user.id,
         name: user.name,
-        dob: user.dob,
+        email: user.email,
         state: user.state,
-        category: user.category,
-        employmentStatus: user.employmentStatus,
-        casteCategory: user.casteCategory,
-        email: user.email
+        category: user.category
       }
     });
 
