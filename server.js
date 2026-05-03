@@ -24,7 +24,9 @@ app.get("/", (req, res) => {
 
 /* ================= EMAIL CONFIG ================= */
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -40,7 +42,6 @@ function loadUsers() {
     if (!fs.existsSync(USERS_FILE)) return [];
 
     const data = fs.readFileSync(USERS_FILE, "utf8");
-
     return data ? JSON.parse(data) : [];
 
   } catch (error) {
@@ -55,6 +56,7 @@ function saveUsers(users) {
       USERS_FILE,
       JSON.stringify(users, null, 2)
     );
+
   } catch (error) {
     console.log("Write Error:", error);
   }
