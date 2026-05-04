@@ -18,6 +18,8 @@ const USERS_FILE = path.join(__dirname, "users.json");
 /* ================= MIDDLEWARE ================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+/* ✅ STATIC FILES (IMPORTANT) */
 app.use(express.static(__dirname));
 
 /* ================= ROOT ================= */
@@ -80,7 +82,6 @@ app.post("/api/send-otp", async (req, res) => {
         <h2>Bharat Portal</h2>
         <p>Your OTP is:</p>
         <h1>${otp}</h1>
-        <p>Valid for signup verification.</p>
       `
     });
 
@@ -168,7 +169,7 @@ app.post("/api/signup", async (req, res) => {
   }
 });
 
-/* ================= SIGNIN ================= */
+/* ================= SIGNIN (FIXED) ================= */
 app.post("/api/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -198,6 +199,7 @@ app.post("/api/signin", async (req, res) => {
       });
     }
 
+    /* ✅ FIX: Send FULL user data */
     res.json({
       success: true,
       message: "Login successful",
@@ -205,8 +207,11 @@ app.post("/api/signin", async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        dob: user.dob,
         state: user.state,
-        category: user.category
+        category: user.category,
+        employmentStatus: user.employmentStatus,
+        casteCategory: user.casteCategory
       }
     });
 
@@ -217,6 +222,23 @@ app.post("/api/signin", async (req, res) => {
       success: false,
       message: "Server error"
     });
+  }
+});
+
+/* ================= OPTIONAL SEARCH API ================= */
+app.get("/api/schemes", (req, res) => {
+  try {
+    const filePath = path.join(__dirname, "schemes.json");
+
+    if (!fs.existsSync(filePath)) {
+      return res.json([]);
+    }
+
+    const data = JSON.parse(fs.readFileSync(filePath));
+    res.json(data);
+
+  } catch (error) {
+    res.status(500).json({ error: "Failed to load schemes" });
   }
 });
 
