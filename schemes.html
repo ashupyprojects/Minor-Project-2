@@ -1,73 +1,127 @@
-<script src="schemes.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bharat Portal - Eligibility</title>
+  <link rel="stylesheet" href="style.css">
 
-<script>
-function calculateAge(dob) {
-  const birth = new Date(dob);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const m = today.getMonth() - birth.getMonth();
+  <style>
+    .filter-card {
+      max-width: 500px;
+      margin: 40px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+    }
 
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
+    #schemesContainer {
+      max-width: 900px;
+      margin: 20px auto;
+    }
+  </style>
+</head>
 
-  return age;
-}
+<body class="auth-body">
 
-function applyFilter() {
+  <div class="top-brand">
+    <img src="icons/emblem.png" class="top-emblem">
+    <a href="/index.html">
+      <img src="icons/websitelogo.png" class="top-logo">
+    </a>
+  </div>
 
-  const dob = document.getElementById("dob").value;
-  const state = document.getElementById("state").value;
-  const category = document.getElementById("category").value;
+  <div class="filter-card">
+    <h2>Eligibility Search</h2>
 
-  if (!dob || !state || !category) {
-    alert("Please fill required fields");
-    return;
-  }
+    <input type="date" id="dob" class="input-field" required>
 
-  // 🔥 FILTER USING PAGE (your existing structure)
-  const filtered = schemes.filter(s => {
+    <input type="text" id="state" class="input-field" placeholder="State*" required>
 
-    if (category === "Student") return s.page.includes("student") || s.page.includes("education");
-    if (category === "Farmer") return s.page.includes("agriculture") || s.page.includes("farmer");
-    if (category === "Senior Citizen") return s.page.includes("senior");
-    if (category === "Entrepreneur") return s.page.includes("entrepreneur") || s.page.includes("employment");
+    <select id="category" class="input-field" required>
+      <option value="">Select Category</option>
+      <option value="Student">Student</option>
+      <option value="Farmer">Farmer</option>
+      <option value="Senior Citizen">Senior Citizen</option>
+      <option value="Entrepreneur">Entrepreneur</option>
+    </select>
 
-    return true;
-  });
+    <button class="submit-btn" onclick="applyFilter()">Search Schemes</button>
+  </div>
 
-  displaySchemes(filtered);
-}
+  <div id="schemesContainer"></div>
 
-function displaySchemes(schemes) {
+  <!-- IMPORTANT -->
+  <script src="schemes.js"></script>
+  <script src="save.js"></script>
 
-  const container = document.getElementById("schemesContainer");
-  container.innerHTML = "";
+  <script>
+    function calculateAge(dob) {
+      const birth = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
 
-  if (!schemes || schemes.length === 0) {
-    container.innerHTML = "<p>No eligible schemes found</p>";
-    return;
-  }
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
 
-  schemes.forEach(s => {
-    const div = document.createElement("div");
-    div.classList.add("scheme-card");
+      return age;
+    }
 
-    div.innerHTML = `
-      <div class="scheme-left">
-        <span class="tag">${s.page}</span>
-        <span class="scheme-name">${s.name}</span>
-      </div>
+    function applyFilter() {
+      const dob = document.getElementById("dob").value;
+      const category = document.getElementById("category").value;
 
-      <div class="scheme-right">
-        <a href="${s.page}" target="_blank" class="view-btn">View</a>
-        <button class="save-btn" onclick="saveScheme('${s.name}', '${s.page}')">
-          Add to My Schemes
-        </button>
-      </div>
-    `;
+      if (!dob || !category) {
+        alert("Please fill required fields");
+        return;
+      }
 
-    container.appendChild(div);
-  });
-}
-</script>
+      // FRONTEND FILTER (OLD LOGIC)
+      const filtered = schemes.filter(s => {
+
+        if (category === "Student") return s.page.includes("student") || s.page.includes("education");
+        if (category === "Farmer") return s.page.includes("agriculture") || s.page.includes("farmers");
+        if (category === "Senior Citizen") return s.page.includes("senior");
+        if (category === "Entrepreneur") return s.page.includes("entrepreneurs") || s.page.includes("employment");
+
+        return true;
+      });
+
+      displaySchemes(filtered);
+    }
+
+    function displaySchemes(schemes) {
+      const container = document.getElementById("schemesContainer");
+      container.innerHTML = "";
+
+      if (schemes.length === 0) {
+        container.innerHTML = "<p>No eligible schemes found</p>";
+        return;
+      }
+
+      schemes.forEach(s => {
+        const div = document.createElement("div");
+        div.classList.add("scheme-card");
+
+        div.innerHTML = `
+          <div class="scheme-left">
+            <span class="tag">${s.page}</span>
+            <span class="scheme-name">${s.name}</span>
+          </div>
+
+          <div class="scheme-right">
+            <a href="${s.page}" target="_blank" class="view-btn">View</a>
+            <button class="save-btn" onclick="saveScheme('${s.name}', '${s.page}')">
+              Add to My Schemes
+            </button>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+  </script>
+
+</body>
+</html>
