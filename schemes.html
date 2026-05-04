@@ -45,14 +45,26 @@
       <option value="Entrepreneur">Entrepreneur</option>
     </select>
 
+    <select id="employment" class="input-field">
+      <option value="">Employment Status</option>
+      <option value="working">Working</option>
+      <option value="unemployed">Unemployed</option>
+    </select>
+
+    <select id="caste" class="input-field">
+      <option value="">Caste Category</option>
+      <option value="General">General</option>
+      <option value="OBC">OBC</option>
+      <option value="SC">SC</option>
+      <option value="ST">ST</option>
+    </select>
+
+    <input type="number" id="income" class="input-field" placeholder="Annual Income">
+
     <button class="submit-btn" onclick="applyFilter()">Search Schemes</button>
   </div>
 
   <div id="schemesContainer"></div>
-
-  <!-- IMPORTANT -->
-  <script src="schemes.js"></script>
-  <script src="save.js"></script>
 
   <script>
     function calculateAge(dob) {
@@ -68,27 +80,26 @@
       return age;
     }
 
-    function applyFilter() {
+    async function applyFilter() {
       const dob = document.getElementById("dob").value;
+      const state = document.getElementById("state").value;
       const category = document.getElementById("category").value;
+      const caste = document.getElementById("caste").value;
+      const income = document.getElementById("income").value;
 
-      if (!dob || !category) {
-        alert("Please fill required fields");
+      if (!dob || !state || !category) {
+        alert("Please fill required fields (DOB, State, Category)");
         return;
       }
 
-      // FRONTEND FILTER (OLD LOGIC)
-      const filtered = schemes.filter(s => {
+      const age = calculateAge(dob);
 
-        if (category === "Student") return s.page.includes("student") || s.page.includes("education");
-        if (category === "Farmer") return s.page.includes("agriculture") || s.page.includes("farmers");
-        if (category === "Senior Citizen") return s.page.includes("senior");
-        if (category === "Entrepreneur") return s.page.includes("entrepreneurs") || s.page.includes("employment");
+      const url = `/filter-schemes?age=${age}&income=${income}&state=${state}&beneficiary=${category}&caste=${caste}`;
 
-        return true;
-      });
+      const res = await fetch(url);
+      const schemes = await res.json();
 
-      displaySchemes(filtered);
+      displaySchemes(schemes);
     }
 
     function displaySchemes(schemes) {
@@ -96,7 +107,7 @@
       container.innerHTML = "";
 
       if (schemes.length === 0) {
-        container.innerHTML = "<p>No eligible schemes found</p>";
+        container.innerHTML = "<p class='no-result'>No eligible schemes found</p>";
         return;
       }
 
@@ -106,13 +117,18 @@
 
         div.innerHTML = `
           <div class="scheme-left">
-            <span class="tag">${s.page}</span>
+            <span class="tag">${s.category}</span>
             <span class="scheme-name">${s.name}</span>
           </div>
 
           <div class="scheme-right">
             <a href="${s.page}" target="_blank" class="view-btn">View</a>
-            <button class="save-btn" onclick="saveScheme('${s.name}', '${s.page}')">
+
+            <!-- ✅ FIXED BUTTON -->
+            <button 
+              class="save-btn" 
+              data-name="${s.name}" 
+              onclick="saveScheme('${s.name}', '${s.page}')">
               Add to My Schemes
             </button>
           </div>
@@ -122,6 +138,9 @@
       });
     }
   </script>
+
+  <!-- ✅ IMPORTANT -->
+  <script src="save.js"></script>
 
 </body>
 </html>
