@@ -10,19 +10,14 @@
 
 <header>
   <div class="left">
-    <img src="icons/emblem.png" height="80" width="50" alt="Emblem">
-
+    <img src="icons/emblem.png" height="80" width="50">
     <a href="/index.html">
-      <img src="icons/websitelogo.png" height="80" width="250" alt="Logo">
+      <img src="icons/websitelogo.png" height="80" width="250">
     </a>
   </div>
 
   <div class="center">
-    <input
-      type="text"
-      placeholder="Search Central Government Schemes"
-      class="search-box"
-    >
+    <input type="text" placeholder="Search Central Government Schemes" class="search-box">
   </div>
 
   <div class="right" id="auth-area"></div>
@@ -31,28 +26,26 @@
 <main class="profile-page">
   <div class="profile-card-wide">
 
-    <!-- LEFT PANEL -->
+    <!-- LEFT -->
     <div class="profile-card-left">
 
+      <!-- PROFILE IMAGE -->
       <div class="profile-avatar">
-        <img id="profile-img" style="display:none;" alt="Profile Photo">
+        <img id="profile-img" style="display:none;">
         <span id="profile-initial"></span>
       </div>
 
+      <!-- UPLOAD BUTTON -->
       <input type="file" id="upload-photo" accept="image/*" hidden>
 
-      <button
-        class="upload-btn"
-        onclick="document.getElementById('upload-photo').click()"
-      >
+      <button onclick="document.getElementById('upload-photo').click()" class="upload-btn">
         Change Photo
       </button>
 
       <h2 id="profile-name"></h2>
-
     </div>
 
-    <!-- RIGHT PANEL -->
+    <!-- RIGHT -->
     <div class="profile-card-right">
 
       <section class="profile-section">
@@ -93,11 +86,11 @@
         </div>
       </section>
 
+      <!-- SAVED SCHEMES -->
       <h3>Saved Schemes</h3>
       <div id="saved-list"></div>
 
     </div>
-
   </div>
 </main>
 
@@ -107,7 +100,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   const rawUser = localStorage.getItem("bpUser");
-
   if (!rawUser) {
     window.location.href = "/signinform.html";
     return;
@@ -115,21 +107,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const user = JSON.parse(rawUser);
 
-  /* =========================
-     USER INFO
-  ========================= */
-
-  document.getElementById("profile-name").textContent =
-    user.name || "";
-
-  document.getElementById("profile-email").textContent =
-    user.email || "";
+  // ===== USER INFO =====
+  document.getElementById("profile-name").textContent = user.name || "";
+  document.getElementById("profile-email").textContent = user.email || "";
 
   document.getElementById("profile-dob").textContent =
     user.dob || user.dateOfBirth || "";
 
-  document.getElementById("profile-state").textContent =
-    user.state || "";
+  document.getElementById("profile-state").textContent = user.state || "";
 
   document.getElementById("profile-category").textContent =
     user.category || user.beneficiaryType || "";
@@ -140,10 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("profile-caste").textContent =
     user.casteCategory || user.caste || "";
 
-  /* =========================
-     PROFILE IMAGE
-  ========================= */
-
+  // ===== PROFILE IMAGE =====
   const imgEl = document.getElementById("profile-img");
   const initialEl = document.getElementById("profile-initial");
   const uploadInput = document.getElementById("upload-photo");
@@ -155,12 +137,11 @@ document.addEventListener("DOMContentLoaded", () => {
     imgEl.style.display = "block";
     initialEl.style.display = "none";
   } else {
-    initialEl.textContent =
-      user.name ? user.name.charAt(0).toUpperCase() : "U";
+    initialEl.textContent = user.name.charAt(0).toUpperCase();
   }
 
+  // UPLOAD IMAGE
   uploadInput.addEventListener("change", function () {
-
     const file = this.files[0];
 
     if (!file) return;
@@ -173,7 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const reader = new FileReader();
 
     reader.onload = function (e) {
-
       const base64 = e.target.result;
 
       localStorage.setItem("profileImage", base64);
@@ -188,14 +168,9 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.readAsDataURL(file);
   });
 
-  /* =========================
-     SAVED SCHEMES
-  ========================= */
-
+  // ===== SAVED SCHEMES =====
   const savedList = document.getElementById("saved-list");
-
-  let saved =
-    JSON.parse(localStorage.getItem("savedSchemes")) || [];
+  let saved = JSON.parse(localStorage.getItem("savedSchemes")) || [];
 
   savedList.innerHTML = "";
 
@@ -205,9 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   saved.forEach((scheme, index) => {
-
     const div = document.createElement("div");
-
     div.classList.add("saved-card");
 
     div.innerHTML = `
@@ -217,41 +190,21 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
 
       <div class="saved-right">
-        <a href="${scheme.link}" target="_blank" class="view-link">
-          View / Apply
-        </a>
-
-        <button
-          class="remove-btn"
-          onclick="removeScheme(${index})"
-        >
-          ✖
-        </button>
+        <a href="${scheme.link}" target="_blank" class="view-link">View / Apply</a>
+        <button class="remove-btn" onclick="removeScheme(${index})">✖</button>
       </div>
     `;
 
     savedList.appendChild(div);
-
   });
 
 });
 
-/* =========================
-   REMOVE SAVED SCHEME
-========================= */
-
+// REMOVE SAVED SCHEME
 function removeScheme(index) {
-
-  let saved =
-    JSON.parse(localStorage.getItem("savedSchemes")) || [];
-
+  let saved = JSON.parse(localStorage.getItem("savedSchemes")) || [];
   saved.splice(index, 1);
-
-  localStorage.setItem(
-    "savedSchemes",
-    JSON.stringify(saved)
-  );
-
+  localStorage.setItem("savedSchemes", JSON.stringify(saved));
   location.reload();
 }
 </script>
