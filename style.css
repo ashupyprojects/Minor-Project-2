@@ -1564,29 +1564,3 @@ header{
 }
 
 }
-/* PROFILE INFO FIX */
-
-.profile-info-grid{
-  display:grid;
-  grid-template-columns:repeat(2, 1fr);
-  gap:14px 40px;
-  align-items:start;
-}
-
-.profile-info-item{
-  font-size:15px;
-  word-break:break-word;
-}
-
-.profile-info-item .label{
-  font-weight:600;
-  margin-right:6px;
-}
-
-/* Mobile */
-@media (max-width:768px){
-  .profile-info-grid{
-    grid-template-columns:1fr;
-    gap:12px;
-  }
-}
