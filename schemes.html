@@ -1,163 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Bharat Portal - Eligibility</title>
-  <link rel="stylesheet" href="style.css">
+<script src="schemes.js"></script>
 
-  <style>
-    .filter-card {
-      max-width: 500px;
-      margin: 40px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-    }
+<script>
+function calculateAge(dob) {
+  const birth = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
 
-    #schemesContainer {
-      max-width: 900px;
-      margin: 20px auto;
-    }
-  </style>
-</head>
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
 
-<body class="auth-body">
+  return age;
+}
 
-  <!-- TOP BRAND -->
-  <div class="top-brand">
-    <img src="icons/emblem.png" class="top-emblem" alt="Emblem">
-    <a href="/index.html">
-      <img src="icons/websitelogo.png" class="top-logo" alt="Logo">
-    </a>
-  </div>
+function applyFilter() {
 
-  <!-- FILTER CARD -->
-  <div class="filter-card">
-    <h2>Eligibility Search</h2>
+  const dob = document.getElementById("dob").value;
+  const state = document.getElementById("state").value;
+  const category = document.getElementById("category").value;
 
-    <input type="date" id="dob" class="input-field" required>
+  if (!dob || !state || !category) {
+    alert("Please fill required fields");
+    return;
+  }
 
-    <input type="text" id="state" class="input-field" placeholder="State*" required>
+  // 🔥 FILTER USING PAGE (your existing structure)
+  const filtered = schemes.filter(s => {
 
-    <select id="category" class="input-field" required>
-      <option value="">Select Category</option>
-      <option value="Student">Student</option>
-      <option value="Farmer">Farmer</option>
-      <option value="Senior Citizen">Senior Citizen</option>
-      <option value="Entrepreneur">Entrepreneur</option>
-    </select>
+    if (category === "Student") return s.page.includes("student") || s.page.includes("education");
+    if (category === "Farmer") return s.page.includes("agriculture") || s.page.includes("farmer");
+    if (category === "Senior Citizen") return s.page.includes("senior");
+    if (category === "Entrepreneur") return s.page.includes("entrepreneur") || s.page.includes("employment");
 
-    <select id="employment" class="input-field">
-      <option value="">Employment Status</option>
-      <option value="working">Working</option>
-      <option value="unemployed">Unemployed</option>
-    </select>
+    return true;
+  });
 
-    <select id="caste" class="input-field">
-      <option value="">Caste Category</option>
-      <option value="General">General</option>
-      <option value="OBC">OBC</option>
-      <option value="SC">SC</option>
-      <option value="ST">ST</option>
-    </select>
+  displaySchemes(filtered);
+}
 
-    <input type="number" id="income" class="input-field" placeholder="Annual Income">
+function displaySchemes(schemes) {
 
-    <button class="submit-btn" onclick="applyFilter()">Search Schemes</button>
-  </div>
+  const container = document.getElementById("schemesContainer");
+  container.innerHTML = "";
 
-  <!-- RESULTS -->
-  <div id="schemesContainer"></div>
+  if (!schemes || schemes.length === 0) {
+    container.innerHTML = "<p>No eligible schemes found</p>";
+    return;
+  }
 
-  <script>
-    function calculateAge(dob) {
-      const birth = new Date(dob);
-      const today = new Date();
+  schemes.forEach(s => {
+    const div = document.createElement("div");
+    div.classList.add("scheme-card");
 
-      let age = today.getFullYear() - birth.getFullYear();
-      const m = today.getMonth() - birth.getMonth();
+    div.innerHTML = `
+      <div class="scheme-left">
+        <span class="tag">${s.page}</span>
+        <span class="scheme-name">${s.name}</span>
+      </div>
 
-      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-        age--;
-      }
+      <div class="scheme-right">
+        <a href="${s.page}" target="_blank" class="view-btn">View</a>
+        <button class="save-btn" onclick="saveScheme('${s.name}', '${s.page}')">
+          Add to My Schemes
+        </button>
+      </div>
+    `;
 
-      return age;
-    }
-
-    async function applyFilter() {
-
-      const dob = document.getElementById("dob").value;
-      const state = document.getElementById("state").value;
-      const category = document.getElementById("category").value;
-      const caste = document.getElementById("caste").value;
-      const income = document.getElementById("income").value;
-
-      if (!dob || !state || !category) {
-        alert("Please fill required fields (DOB, State, Category)");
-        return;
-      }
-
-      const age = calculateAge(dob);
-
-      try {
-        /* ✅ FIX: ENCODE URL */
-        const url = `/filter-schemes?age=${age}&income=${income}&state=${encodeURIComponent(state)}&beneficiary=${encodeURIComponent(category)}&caste=${encodeURIComponent(caste)}`;
-
-        const res = await fetch(url);
-
-        if (!res.ok) {
-          throw new Error("Server not responding");
-        }
-
-        const schemes = await res.json();
-
-        displaySchemes(schemes);
-
-      } catch (error) {
-        console.log("Fetch Error:", error);
-        alert("Error loading schemes. Please check server.");
-      }
-    }
-
-    function displaySchemes(schemes) {
-
-      const container = document.getElementById("schemesContainer");
-      container.innerHTML = "";
-
-      if (!schemes || schemes.length === 0) {
-        container.innerHTML = "<p class='no-result'>No eligible schemes found</p>";
-        return;
-      }
-
-      schemes.forEach(s => {
-
-        const div = document.createElement("div");
-        div.classList.add("scheme-card");
-
-        div.innerHTML = `
-          <div class="scheme-left">
-            <span class="tag">${s.category || ""}</span>
-            <span class="scheme-name">${s.name || "Unnamed Scheme"}</span>
-          </div>
-
-          <div class="scheme-right">
-            <a href="${s.page || "#"}" target="_blank" class="view-btn">View</a>
-
-            <button 
-              class="save-btn" 
-              onclick="saveScheme('${s.name}', '${s.page}')">
-              Add to My Schemes
-            </button>
-          </div>
-        `;
-
-        container.appendChild(div);
-      });
-    }
-  </script>
-
-  <!-- SAVE FEATURE -->
-  <script src="save.js"></script>
-
-</body>
-</html>
+    container.appendChild(div);
+  });
+}
+</script>
